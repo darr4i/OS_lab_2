@@ -1,0 +1,15 @@
+C:\Users\HP\Desktop\универ\ос\OS_lab_2\SlabAllocator\bin\Debug\net8.0\SlabAllocator.exe
+C:\Users\HP\Desktop\универ\ос\OS_lab_2\SlabAllocator\bin\Debug\net8.0\SlabAllocator.deps.json
+C:\Users\HP\Desktop\универ\ос\OS_lab_2\SlabAllocator\bin\Debug\net8.0\SlabAllocator.runtimeconfig.json
+C:\Users\HP\Desktop\универ\ос\OS_lab_2\SlabAllocator\bin\Debug\net8.0\SlabAllocator.dll
+C:\Users\HP\Desktop\универ\ос\OS_lab_2\SlabAllocator\bin\Debug\net8.0\SlabAllocator.pdb
+C:\Users\HP\Desktop\универ\ос\OS_lab_2\SlabAllocator\obj\Debug\net8.0\SlabAllocator.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\HP\Desktop\универ\ос\OS_lab_2\SlabAllocator\obj\Debug\net8.0\SlabAllocator.AssemblyInfoInputs.cache
+C:\Users\HP\Desktop\универ\ос\OS_lab_2\SlabAllocator\obj\Debug\net8.0\SlabAllocator.AssemblyInfo.cs
+C:\Users\HP\Desktop\универ\ос\OS_lab_2\SlabAllocator\obj\Debug\net8.0\SlabAllocator.csproj.CoreCompileInputs.cache
+C:\Users\HP\Desktop\универ\ос\OS_lab_2\SlabAllocator\obj\Debug\net8.0\SlabAllocator.sourcelink.json
+C:\Users\HP\Desktop\универ\ос\OS_lab_2\SlabAllocator\obj\Debug\net8.0\SlabAllocator.dll
+C:\Users\HP\Desktop\универ\ос\OS_lab_2\SlabAllocator\obj\Debug\net8.0\refint\SlabAllocator.dll
+C:\Users\HP\Desktop\универ\ос\OS_lab_2\SlabAllocator\obj\Debug\net8.0\SlabAllocator.pdb
+C:\Users\HP\Desktop\универ\ос\OS_lab_2\SlabAllocator\obj\Debug\net8.0\SlabAllocator.genruntimeconfig.cache
+C:\Users\HP\Desktop\универ\ос\OS_lab_2\SlabAllocator\obj\Debug\net8.0\ref\SlabAllocator.dll
