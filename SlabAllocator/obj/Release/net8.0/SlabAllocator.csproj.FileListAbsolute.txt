@@ -1,0 +1,5 @@
+C:\Users\HP\Desktop\универ\ос\OS_lab_2\SlabAllocator\obj\Release\net8.0\SlabAllocator.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\HP\Desktop\универ\ос\OS_lab_2\SlabAllocator\obj\Release\net8.0\SlabAllocator.AssemblyInfoInputs.cache
+C:\Users\HP\Desktop\универ\ос\OS_lab_2\SlabAllocator\obj\Release\net8.0\SlabAllocator.AssemblyInfo.cs
+C:\Users\HP\Desktop\универ\ос\OS_lab_2\SlabAllocator\obj\Release\net8.0\SlabAllocator.csproj.CoreCompileInputs.cache
+C:\Users\HP\Desktop\универ\ос\OS_lab_2\SlabAllocator\obj\Release\net8.0\SlabAllocator.sourcelink.json

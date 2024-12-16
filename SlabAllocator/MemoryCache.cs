@@ -12,7 +12,6 @@ namespace SlabAllocator
         {
             this.objectSize = objectSize;
             this.slabs = new Queue<Slab>();
-
             AddNewSlab(pageSize);
         }
 
