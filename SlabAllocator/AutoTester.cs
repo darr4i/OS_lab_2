@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Security.Cryptography;
-using System.Collections; // Для StructuralComparisons
+using System.Collections; 
 
 namespace SlabAllocator
 {
@@ -88,12 +88,12 @@ namespace SlabAllocator
 
         private void PerformRealloc()
         {
-            if (allocatedBlocks.Count == 0) return; // Проверка на пустой список
+            if (allocatedBlocks.Count == 0) return; 
 
             int index = random.Next(allocatedBlocks.Count);
             AllocatedBlock block = allocatedBlocks[index];
 
-            if (block == null) // Проверка на нулевой блок
+            if (block == null) 
             {
                 Console.WriteLine("[ERROR] Пошкодження блоку перед realloc!");
                 return;
@@ -108,7 +108,7 @@ namespace SlabAllocator
             int newSize = random.Next(16, 2048);
             IntPtr newPointer = allocator.Allocate(newSize);
 
-            if (newPointer == IntPtr.Zero) // Проверка на успешное выделение памяти
+            if (newPointer == IntPtr.Zero) 
             {
                 Console.WriteLine("[ERROR] Не вдалося виділити нову пам'ять для realloc.");
                 return;
@@ -120,7 +120,7 @@ namespace SlabAllocator
                 Buffer.MemoryCopy((void*)block.Pointer, (void*)newPointer, newSize, copySize);
             }
 
-            allocator.Deallocate(block.Pointer); // Освобождение старого блока
+            allocator.Deallocate(block.Pointer); 
             byte[] newData = FillRandomData(newSize);
             byte[] newChecksum = ComputeChecksum(newData);
 
