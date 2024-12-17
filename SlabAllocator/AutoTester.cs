@@ -88,10 +88,16 @@ namespace SlabAllocator
 
         private void PerformRealloc()
         {
-            if (allocatedBlocks.Count == 0) return;
+            if (allocatedBlocks.Count == 0) return; // Проверка на пустой список
 
             int index = random.Next(allocatedBlocks.Count);
             AllocatedBlock block = allocatedBlocks[index];
+
+            if (block == null) // Проверка на нулевой блок
+            {
+                Console.WriteLine("[ERROR] Пошкодження блоку перед realloc!");
+                return;
+            }
 
             if (!VerifyBlock(block))
             {
@@ -102,26 +108,30 @@ namespace SlabAllocator
             int newSize = random.Next(16, 2048);
             IntPtr newPointer = allocator.Allocate(newSize);
 
-            if (newPointer != IntPtr.Zero)
+            if (newPointer == IntPtr.Zero) // Проверка на успешное выделение памяти
             {
-                unsafe
-                {
-                    int copySize = Math.Min(block.Size, newSize);
-                    Buffer.MemoryCopy((void*)block.Pointer, (void*)newPointer, newSize, copySize);
-                }
-
-                allocator.Deallocate(block.Pointer);
-                byte[] newData = FillRandomData(newSize);
-                byte[] newChecksum = ComputeChecksum(newData);
-
-                block.Pointer = newPointer;
-                block.Size = newSize;
-                block.Data = newData;
-                block.Checksum = newChecksum;
-
-                Console.WriteLine($"[REALLOC] Блок змінено до {newSize} байт.");
+                Console.WriteLine("[ERROR] Не вдалося виділити нову пам'ять для realloc.");
+                return;
             }
+
+            unsafe
+            {
+                int copySize = Math.Min(block.Size, newSize);
+                Buffer.MemoryCopy((void*)block.Pointer, (void*)newPointer, newSize, copySize);
+            }
+
+            allocator.Deallocate(block.Pointer); // Освобождение старого блока
+            byte[] newData = FillRandomData(newSize);
+            byte[] newChecksum = ComputeChecksum(newData);
+
+            block.Pointer = newPointer;
+            block.Size = newSize;
+            block.Data = newData;
+            block.Checksum = newChecksum;
+
+            Console.WriteLine($"[REALLOC] Блок змінено до {newSize} байт.");
         }
+
 
         private void PerformFree()
         {
@@ -157,4 +167,3 @@ namespace SlabAllocator
         }
     }
 }
-

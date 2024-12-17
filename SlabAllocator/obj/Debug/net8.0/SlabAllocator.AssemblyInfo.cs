@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("SlabAllocator")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+ca4ae5f5deec580ea9204097f587f9f1614e6a45")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+71cab00388b65f0ba748c9bb4499c74d60405eea")]
 [assembly: System.Reflection.AssemblyProductAttribute("SlabAllocator")]
 [assembly: System.Reflection.AssemblyTitleAttribute("SlabAllocator")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
