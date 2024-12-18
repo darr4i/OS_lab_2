@@ -5,56 +5,79 @@ namespace SlabAllocator
 {
     public class MemoryAllocator
     {
-        private readonly List<MemoryCache> caches;
-        private readonly int pageSize = 4096; 
-        private readonly int arenaSize = 4096 * 16; 
+        private const int PageSize = 4096; 
+        private Dictionary<int, List<Slab>> slabCache; 
 
         public MemoryAllocator()
         {
-            caches = new List<MemoryCache>();
-            InitializeCaches();
-        }
-
-        private void InitializeCaches()
-        {
-            int[] objectSizes = { 16, 32, 64, 128, 256, 512, 1024 };
-            foreach (var size in objectSizes)
-            {
-                caches.Add(new MemoryCache(size, pageSize));
-            }
+            slabCache = new Dictionary<int, List<Slab>>();
         }
 
         public IntPtr Allocate(int size)
         {
-            foreach (var cache in caches)
+            if (size <= 0) throw new ArgumentOutOfRangeException(nameof(size), "Размер должен быть больше 0");
+
+            int slabSize = GetNearestPowerOfTwo(size);
+
+            if (!slabCache.ContainsKey(slabSize) || slabCache[slabSize].Count == 0)
             {
-                if (cache.CanAllocate(size))
+                AddNewSlab(slabSize); 
+            }
+
+            foreach (var slab in slabCache[slabSize])
+            {
+                IntPtr ptr = slab.Allocate();
+                if (ptr != IntPtr.Zero)
                 {
-                    return cache.Allocate();
+                    return ptr;
                 }
             }
-            throw new OutOfMemoryException("Не вдалося виділити пам'ять");
+
+            AddNewSlab(slabSize);
+            return slabCache[slabSize][^1].Allocate();
         }
 
         public void Deallocate(IntPtr ptr)
         {
-            foreach (var cache in caches)
+            if (ptr == IntPtr.Zero) return;
+
+            foreach (var kvp in slabCache)
             {
-                if (cache.Contains(ptr))
+                foreach (var slab in kvp.Value)
                 {
-                    cache.Deallocate(ptr);
-                    return;
+                    slab.Deallocate(ptr);
                 }
             }
-            throw new InvalidOperationException("Спроба звільнити недійсний вказівник");
         }
 
         public void MemShow()
         {
-            foreach (var cache in caches)
+            Console.WriteLine("Состояние памяти:");
+
+            foreach (var kvp in slabCache)
             {
-                cache.ShowStatus();
+                int objectSize = kvp.Key;
+                int slabCount = kvp.Value.Count;
+
+                Console.WriteLine($"Кеш объектов размером {objectSize} байт: {slabCount} slabs.");
             }
+        }
+
+        private void AddNewSlab(int objectSize)
+        {
+            if (!slabCache.ContainsKey(objectSize))
+            {
+                slabCache[objectSize] = new List<Slab>();
+            }
+
+            slabCache[objectSize].Add(new Slab(objectSize, PageSize));
+        }
+
+        private int GetNearestPowerOfTwo(int size)
+        {
+            int power = 1;
+            while (power < size) power *= 2;
+            return power;
         }
     }
 }

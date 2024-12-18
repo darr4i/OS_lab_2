@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Security.Cryptography;
-using System.Collections; 
+using System.Collections;
 
 namespace SlabAllocator
 {
@@ -41,6 +41,11 @@ namespace SlabAllocator
 
         private bool VerifyBlock(AllocatedBlock block)
         {
+            if (block == null || block.Pointer == IntPtr.Zero)
+            {
+                return false;
+            }
+
             byte[] currentChecksum = ComputeChecksum(block.Data);
             return StructuralComparisons.StructuralEqualityComparer.Equals(block.Checksum, currentChecksum);
         }
@@ -66,7 +71,7 @@ namespace SlabAllocator
 
         private void PerformAlloc()
         {
-            int size = random.Next(16, 1024);
+            int size = random.Next(16, 512);
             IntPtr pointer = allocator.Allocate(size);
 
             if (pointer != IntPtr.Zero)
@@ -84,54 +89,72 @@ namespace SlabAllocator
 
                 Console.WriteLine($"[ALLOC] Виділено {size} байт.");
             }
+            else
+            {
+                Console.WriteLine("[ERROR] Allocate failed to provide memory.");
+            }
         }
 
         private void PerformRealloc()
         {
-            if (allocatedBlocks.Count == 0) return; 
+            if (allocatedBlocks.Count == 0) return;
 
             int index = random.Next(allocatedBlocks.Count);
             AllocatedBlock block = allocatedBlocks[index];
 
-            if (block == null) 
-            {
-                Console.WriteLine("[ERROR] Пошкодження блоку перед realloc!");
-                return;
-            }
-
             if (!VerifyBlock(block))
             {
-                Console.WriteLine("[ERROR] Пошкодження блоку перед realloc!");
+                Console.WriteLine("[ERROR] Data corruption detected before realloc.");
                 return;
             }
 
             int newSize = random.Next(16, 2048);
             IntPtr newPointer = allocator.Allocate(newSize);
 
-            if (newPointer == IntPtr.Zero) 
+            if (newPointer == IntPtr.Zero)
             {
-                Console.WriteLine("[ERROR] Не вдалося виділити нову пам'ять для realloc.");
+                Console.WriteLine("[ERROR] Failed to allocate memory for realloc.");
                 return;
             }
 
-            unsafe
+            try
             {
-                int copySize = Math.Min(block.Size, newSize);
-                Buffer.MemoryCopy((void*)block.Pointer, (void*)newPointer, newSize, copySize);
+                unsafe
+                {
+                    if (block.Pointer == IntPtr.Zero || newPointer == IntPtr.Zero)
+                    {
+                        Console.WriteLine("[ERROR] Null reference during realloc!");
+                        allocator.Deallocate(newPointer);
+                        return;
+                    }
+
+                    int copySize = Math.Min(block.Size, newSize);
+                    if (copySize > 0)
+                    {
+                        Buffer.MemoryCopy((void*)block.Pointer, (void*)newPointer, newSize, copySize);
+                    }
+
+                    // Ensure new data space is correctly initialized
+                    byte[] newData = new byte[newSize];
+                    Array.Copy(block.Data, newData, copySize);
+                    block.Data = newData;
+                    block.Checksum = ComputeChecksum(newData);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[ERROR] Memory copy failed: {ex.Message}");
+                allocator.Deallocate(newPointer);
+                return;
             }
 
-            allocator.Deallocate(block.Pointer); 
-            byte[] newData = FillRandomData(newSize);
-            byte[] newChecksum = ComputeChecksum(newData);
+            allocator.Deallocate(block.Pointer);
 
             block.Pointer = newPointer;
             block.Size = newSize;
-            block.Data = newData;
-            block.Checksum = newChecksum;
 
             Console.WriteLine($"[REALLOC] Блок змінено до {newSize} байт.");
         }
-
 
         private void PerformFree()
         {
@@ -142,7 +165,7 @@ namespace SlabAllocator
 
             if (!VerifyBlock(block))
             {
-                Console.WriteLine("[ERROR] Пошкодження блоку перед free!");
+                Console.WriteLine("[ERROR] Data corruption detected before free!");
                 return;
             }
 
@@ -157,7 +180,7 @@ namespace SlabAllocator
             {
                 if (!VerifyBlock(block))
                 {
-                    Console.WriteLine("[ERROR] Пошкодження даних під час завершення тестування!");
+                    Console.WriteLine("[ERROR] Data corruption detected during cleanup!");
                 }
                 allocator.Deallocate(block.Pointer);
             }

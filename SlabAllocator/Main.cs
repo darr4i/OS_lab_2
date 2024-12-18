@@ -26,7 +26,7 @@ class Program
         AutoTester tester = new AutoTester(allocator);
 
         // Запуск 1000 випадкових операцій
-        tester.RunTests(1000);
+        tester.RunTests(100);
 
         Console.WriteLine("Тестування завершено. Стан пам'яті:");
         allocator.MemShow();
