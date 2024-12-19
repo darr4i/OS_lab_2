@@ -52,7 +52,7 @@ namespace SlabAllocator
 
         public void RunTests(int iterations)
         {
-            Console.WriteLine("Запуск автоматичного тестування...");
+            Console.WriteLine("\n[INFO] Running automated tests...");
 
             for (int i = 0; i < iterations; i++)
             {
@@ -66,13 +66,14 @@ namespace SlabAllocator
             }
 
             Cleanup();
-            Console.WriteLine("Автоматичне тестування завершено.");
+            Console.WriteLine("[INFO] Testing completed.");
         }
 
         private void PerformAlloc()
         {
             int size = random.Next(16, 512);
             IntPtr pointer = allocator.Allocate(size);
+            
 
             if (pointer != IntPtr.Zero)
             {
@@ -87,7 +88,7 @@ namespace SlabAllocator
                     Checksum = checksum
                 });
 
-                Console.WriteLine($"[ALLOC] Виділено {size} байт.");
+                Console.WriteLine($"[ALLOC] Allocated {size} bytes.");
             }
             else
             {
@@ -95,7 +96,7 @@ namespace SlabAllocator
             }
         }
 
-        private void PerformRealloc()
+                private void PerformRealloc()
         {
             if (allocatedBlocks.Count == 0) return;
 
@@ -119,27 +120,26 @@ namespace SlabAllocator
 
             try
             {
+                if (block.Data == null || block.Pointer == IntPtr.Zero)
+                {
+                    Console.WriteLine("[ERROR] Null reference during realloc!");
+                    allocator.Deallocate(newPointer); // Звільняємо новий блок
+                    return;
+                }
+
                 unsafe
                 {
-                    if (block.Pointer == IntPtr.Zero || newPointer == IntPtr.Zero)
-                    {
-                        Console.WriteLine("[ERROR] Null reference during realloc!");
-                        allocator.Deallocate(newPointer);
-                        return;
-                    }
-
                     int copySize = Math.Min(block.Size, newSize);
                     if (copySize > 0)
                     {
                         Buffer.MemoryCopy((void*)block.Pointer, (void*)newPointer, newSize, copySize);
                     }
-
-                    // Ensure new data space is correctly initialized
-                    byte[] newData = new byte[newSize];
-                    Array.Copy(block.Data, newData, copySize);
-                    block.Data = newData;
-                    block.Checksum = ComputeChecksum(newData);
                 }
+
+                byte[] newData = new byte[newSize];
+                Array.Copy(block.Data, newData, Math.Min(block.Size, newSize));
+                block.Data = newData;
+                block.Checksum = ComputeChecksum(newData);
             }
             catch (Exception ex)
             {
@@ -153,8 +153,9 @@ namespace SlabAllocator
             block.Pointer = newPointer;
             block.Size = newSize;
 
-            Console.WriteLine($"[REALLOC] Блок змінено до {newSize} байт.");
+            Console.WriteLine($"[REALLOC] Block resized to {newSize} bytes.");
         }
+
 
         private void PerformFree()
         {
@@ -171,7 +172,7 @@ namespace SlabAllocator
 
             allocator.Deallocate(block.Pointer);
             allocatedBlocks.RemoveAt(index);
-            Console.WriteLine("[FREE] Блок звільнено.");
+            Console.WriteLine("[FREE] Block deallocated.");
         }
 
         private void Cleanup()
@@ -186,7 +187,29 @@ namespace SlabAllocator
             }
 
             allocatedBlocks.Clear();
-            Console.WriteLine("Всі блоки звільнені.");
+            Console.WriteLine("[INFO] All blocks deallocated.");
+        }
+    }
+
+    public class Extent
+    {
+        public int Size { get; }
+        public bool IsFree { get; private set; }
+
+        public Extent(int size)
+        {
+            Size = size;
+            IsFree = true;
+        }
+
+        public void MarkUsed()
+        {
+            IsFree = false;
+        }
+
+        public void MarkFree()
+        {
+            IsFree = true;
         }
     }
 }

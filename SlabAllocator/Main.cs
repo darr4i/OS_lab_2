@@ -21,16 +21,36 @@ class Program
         Console.WriteLine("Стан пам'яті після звільнення:");
         allocator.MemShow();
 
-        // Автоматичне тестування
-        Console.WriteLine("\n=== Автоматичне тестування алокатора пам'яті ===");
-        AutoTester tester = new AutoTester(allocator);
+       Console.WriteLine("\n=== Автоматичне тестування алокатора пам'яті ===");
 
-        // Запуск 1000 випадкових операцій
-        tester.RunTests(100);
+        // Виділення блоків пам'яті
+        List<IntPtr> allocatedPointers = new List<IntPtr>();
+        for (int i = 0; i < 10; i++)
+        {
+            IntPtr ptr = allocator.Allocate(128);
+            if (ptr != IntPtr.Zero)
+            {
+                Console.WriteLine($"[ALLOC] Виділено {128} байт за адресою {ptr}");
+                allocatedPointers.Add(ptr);
+            }
+            else
+            {
+                Console.WriteLine("[ERROR] Помилка виділення пам'яті.");
+            }
+        }
 
-        Console.WriteLine("Тестування завершено. Стан пам'яті:");
-        allocator.MemShow();
+                // Звільнення пам'яті
+            foreach (var ptr in allocatedPointers)
+        {
+            allocator.Deallocate(ptr);
+            Console.WriteLine($"[FREE] Звільнено пам'ять за адресою {ptr}");
+        }
 
-        Console.WriteLine("Завершення роботи програми.");
+        // Видаляємо порожні Slabs
+        allocator.MemShow(); // Показ стану до очищення
+        allocator.RemoveEmptySlabs(); // Видаляємо порожні Slabs
+        allocator.MemShow(); // Показ стану після очищення
+
     }
+
 }

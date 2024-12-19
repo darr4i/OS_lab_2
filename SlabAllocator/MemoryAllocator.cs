@@ -15,13 +15,13 @@ namespace SlabAllocator
 
         public IntPtr Allocate(int size)
         {
-            if (size <= 0) throw new ArgumentOutOfRangeException(nameof(size), "Размер должен быть больше 0");
+            if (size <= 0) throw new ArgumentOutOfRangeException(nameof(size), "Розмір має бути більше 0");
 
             int slabSize = GetNearestPowerOfTwo(size);
 
-            if (!slabCache.ContainsKey(slabSize) || slabCache[slabSize].Count == 0)
+            if (!slabCache.ContainsKey(slabSize))
             {
-                AddNewSlab(slabSize); 
+                AddNewSlab(slabSize);
             }
 
             foreach (var slab in slabCache[slabSize])
@@ -33,6 +33,7 @@ namespace SlabAllocator
                 }
             }
 
+            Console.WriteLine($"[INFO] Усі наявні slabs для розміру {slabSize} заповнені. Створюємо новий.");
             AddNewSlab(slabSize);
             return slabCache[slabSize][^1].Allocate();
         }
@@ -48,18 +49,24 @@ namespace SlabAllocator
                     slab.Deallocate(ptr);
                 }
             }
+
+            RemoveEmptySlabs();
         }
 
         public void MemShow()
         {
-            Console.WriteLine("Состояние памяти:");
+            Console.WriteLine("Стан пам'яті:");
 
             foreach (var kvp in slabCache)
             {
                 int objectSize = kvp.Key;
                 int slabCount = kvp.Value.Count;
 
-                Console.WriteLine($"Кеш объектов размером {objectSize} байт: {slabCount} slabs.");
+                Console.WriteLine($"Кеш об'єктів розміром {objectSize} байт: {slabCount} slabs.");
+                foreach (var slab in kvp.Value)
+                {
+                    Console.WriteLine($"   Slab (Allocated: {slab.AllocatedSize}, Empty: {slab.IsEmpty()}, Used: {slab.UsedCount})");
+                }
             }
         }
 
@@ -69,8 +76,15 @@ namespace SlabAllocator
             {
                 slabCache[objectSize] = new List<Slab>();
             }
-
             slabCache[objectSize].Add(new Slab(objectSize, PageSize));
+        }
+
+        public void RemoveEmptySlabs()
+        {
+            foreach (var kvp in slabCache)
+            {
+                kvp.Value.RemoveAll(slab => slab.IsEmpty());
+            }
         }
 
         private int GetNearestPowerOfTwo(int size)
@@ -80,4 +94,5 @@ namespace SlabAllocator
             return power;
         }
     }
+
 }
